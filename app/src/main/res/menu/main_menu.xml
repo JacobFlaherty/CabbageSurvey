@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+    >
+
+
+    <item android:id="@+id/openItem"
+        android:icon="@drawable/ic_open_foreground"
+        android:title="Open"
+
+        />
+
+    <item android:id="@+id/saveItem"
+        android:icon="@drawable/ic_save_foreground"
+        android:title="Save"
+
+        />
+    <item android:id="@+id/saveAsItem"
+        android:icon="@drawable/ic_save_as_foreground"
+        android:title="Save As"
+
+        />
+    <item android:id="@+id/importExportItem"
+
+        android:title="Import/Export"
+
+
+        />
+
+
+
+    <item android:id="@+id/settingsItem"
+        android:icon="@drawable/ic_settings2_foreground"
+        android:title="Settings"
+
+        />
+
+</menu>

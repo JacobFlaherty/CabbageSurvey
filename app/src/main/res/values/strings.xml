@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CabbageSurvey</string>
+    <string name="create_path">Create Path</string>
+    <string name="set_intersection">Set Intersection</string>
+    <string name="input_Distance">Enter Distance (Yards)</string>
+
+</resources>
