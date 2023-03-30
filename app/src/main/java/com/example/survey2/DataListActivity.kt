@@ -1,13 +1,18 @@
 package com.example.survey2
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.view.*
 import android.view.ContextMenu.ContextMenuInfo
 import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -40,7 +45,7 @@ class DataListActivity : AppCompatActivity() {
         }
         var mapNameInput = findViewById<EditText>(R.id.editTextMapName)
         var mapNameInputButton = findViewById<Button>(R.id.enterButton)
-        mapNameInputButton.setOnClickListener{MapsList.currMapName = mapNameInput.text.toString()
+        mapNameInputButton.setOnClickListener{PointsList.currMapName = mapNameInput.text.toString()
 
 
         }
@@ -61,6 +66,26 @@ class DataListActivity : AppCompatActivity() {
 
          */
     }
+    private fun checkPermissions(): Boolean {
+        val result = ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
+        if(result == PackageManager.PERMISSION_GRANTED){
+            return true
+        }
+        else {
+            return false
+
+        }
+    }
+
+    fun requestPermission(){
+        if(ActivityCompat.shouldShowRequestPermissionRationale(this,WRITE_EXTERNAL_STORAGE)){
+            Toast.makeText(this, "Storage permission required, allow in settings", Toast.LENGTH_SHORT).show()
+        }
+        else{
+            ActivityCompat.requestPermissions(this, arrayOf("WRITE_EXTERNAL_STORAGE") ,111)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu);
         val inflater: MenuInflater = menuInflater
@@ -68,7 +93,7 @@ class DataListActivity : AppCompatActivity() {
         return true;
 
     }
-    private fun convertMapToStorable(map: com.example.survey2.Map): InternalStorageMap {
+    /*private fun convertMapToStorable(map: com.example.survey2.Map): InternalStorageMap {
         var internalMap = InternalStorageMap(map.name)
         for (Path in map.paths){
             internalMap.startPointsX.add(Path.startPoint.x)
@@ -83,6 +108,9 @@ class DataListActivity : AppCompatActivity() {
 
         return internalMap
     }
+
+     */
+    /*
     private fun saveMapToInternalStorage(filename: String, map: InternalStorageMap){
         val mMapEncodeDecode = MapEncodeDecode()
         val path: File = applicationContext.filesDir
@@ -96,22 +124,34 @@ class DataListActivity : AppCompatActivity() {
         }
     }
 
+     */
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //when(item.itemId)
         return when(item.itemId){
             R.id.openItem -> {
                 val intent = Intent(this, FileViewActivity::class.java)
-                startActivity(intent)
+                val path = Environment.getExternalStorageDirectory()
+                intent.putExtra("path",path)
+                if(checkPermissions()){
+                    startActivity(intent)
+                }
+                else{
+                    requestPermission()
+                }
+
                 true
             }
 
             R.id.saveItem -> {
-                if(MapsList.currMapName == ""){
+                if(PointsList.currMapName == "Untitled Map"){
                     Toast.makeText(this, "Please enter map name",Toast.LENGTH_LONG).show()
                 }
                 else{
-                    var mapToSave: com.example.survey2.Map = Map(MapsList.currMapName,PathsList.pathIndex)
-                    saveMapToInternalStorage(MapsList.currMapName, convertMapToStorable(mapToSave))
+                    val csvOps = CsvImportExport()
+                    csvOps.writeLineByLine(PointsList.currMapName)
+                    //var mapToSave: com.example.survey2.Map = Map(MapsList.currMapName,PathsList.pathIndex)
+                    //saveMapToInternalStorage(MapsList.currMapName, convertMapToStorable(mapToSave))
                     Toast.makeText(this, "Saved",Toast.LENGTH_LONG).show()
                 }
                 true

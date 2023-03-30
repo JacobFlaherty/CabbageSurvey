@@ -4,6 +4,7 @@ data class InternalStorageMap(
     val name: String,
 
 ){
+    /*
     var startPointsX = mutableListOf<Float>()
     var startPointsY = mutableListOf<Float>()
     var startPointsZ = mutableListOf<Float>()
@@ -11,4 +12,7 @@ data class InternalStorageMap(
     var endPointsX = mutableListOf<Float>()
     var endPointsY = mutableListOf<Float>()
     var endPointsZ = mutableListOf<Float>()
+
+     */
+
 }

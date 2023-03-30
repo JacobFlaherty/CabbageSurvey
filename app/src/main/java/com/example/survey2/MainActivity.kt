@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var distance: Double = 0.0
     var heading = 0f
     var inclination = 0f
-    var startPoint = Point(0f,0f,0f)
+    var startPoint = Point(0f,0f,0f,0)
     var canMoveOn = true
 
     //var currentPoint = Point(0f,0f,0f)
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         // Set up the listeners for take photo and video capture buttons
-        viewBinding.createPathButton.setOnClickListener { createPath() }
+        viewBinding.createPathButton.setOnClickListener { createPoint() }
         viewBinding.setIntersectionButton.setOnClickListener { setIntersection() }
         viewBinding.distanceButton.setOnClickListener { distanceInput()}
 
@@ -188,13 +188,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val absoluteY = mRelativePointOrigin.y + mRelativePoint.y
         val absoluteZ = mRelativePointOrigin.z + mRelativePoint.z
 
-        return Point(absoluteX, absoluteY, absoluteZ)
+        return Point(absoluteX, absoluteY, absoluteZ, 0)
 
 
     }
 
 
-
+/*
     private fun createPath() {
         createPoint()
         val newPath = Path(PointsList.pointIndex[PointsList.currentPoint], PointsList.pointIndex[PointsList.pointIndex.size-1])
@@ -210,15 +210,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     }
 
-    private fun deletePath(){
-        PathsList.pathIndex.removeAt(PathsList.pathIndex.size-1)
+ */
 
-    }
+
+
+
 
     private fun createPoint(){
         val newPoint = relativePointToAbsolute(calculatePointRelative(distance.toFloat(), heading,inclination),PointsList.pointIndex[PointsList.currentPoint])
+        newPoint.pointNumber = getHighestPointIndex()+1
+        newPoint.connectedPoints.add(PointsList.currentPoint)
         PointsList.pointIndex.add(newPoint)
-        println(distance)
+        PointsList.pointIndex[PointsList.currentPoint].connectedPoints.add(newPoint.pointNumber)
+        if(canMoveOn) {
+            PointsList.currentPoint = PointsList.pointIndex.size - 1
+        }
+
 
     }
 
@@ -260,7 +267,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         z = -distance * sin(degreesToRadians(inclination)+(PI/2f).toFloat())
 
         //return arrayOf(x, y, z)
-        return Point(x, y, z)
+        return Point(x, y, z, 0)
 
 
     }

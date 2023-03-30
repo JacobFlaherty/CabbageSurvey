@@ -8,15 +8,20 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.survey2.databinding.ItemFileBinding
+import java.io.File
+import java.nio.file.Files
+import com.example.survey2.CsvImportExport
+
 
 class FileViewAdapter(
-    var maps: List<com.example.survey2.Map>
+    var filesAndFolders: Array<File>
 ) : RecyclerView.Adapter<FileViewAdapter.FileViewHolder>() {
 
     inner class FileViewHolder(val binding: ItemFileBinding) : RecyclerView.ViewHolder(binding.root){
 
     }
     lateinit var thisContext: Context
+    val CsvOps = CsvImportExport()
 
 
 
@@ -32,15 +37,20 @@ class FileViewAdapter(
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
         holder.binding.apply {
-            tvTitle.text = maps[position].name
+            tvTitle.text = filesAndFolders[position].name
             btnDelete.setOnClickListener {
-                MapsList.deleteMap(maps[position],thisContext)
+
+
 
             }
             btnLoad.setOnClickListener{
-                PathsList.pathIndex = maps[position].paths.toMutableList()
-                PointsList.pointIndex = PathsList.convertPathsToPoints()
-                println(PointsList.pointIndex)
+                PointsList.pointIndex = stringListToPointsList(CsvOps.readLineByLine(filesAndFolders[position].name)).toMutableList()
+
+
+
+
+
+
 
 
             }
@@ -48,7 +58,7 @@ class FileViewAdapter(
     }
 
     override fun getItemCount(): Int {
-        return maps.size
+        return filesAndFolders.size
     }
 
 }
