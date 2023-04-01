@@ -26,6 +26,7 @@ class FileViewAdapter(
 
 
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         //val view = LayoutInflater.from(parent.context).inflate(R.layout.item_file, parent, false)
         //return FileViewHolder(view)
@@ -44,7 +45,10 @@ class FileViewAdapter(
 
             }
             btnLoad.setOnClickListener{
-                PointsList.pointIndex = stringListToPointsList(CsvOps.readLineByLine(filesAndFolders[position].name)).toMutableList()
+                println("list size: "+CsvOps.readLineByLine(filesAndFolders[position].name, thisContext).size)
+                println("array size: "+CsvOps.readLineByLine(filesAndFolders[position].name, thisContext)[0].size)
+
+                PointsList.pointIndex = stringListToPointsList(CsvOps.readLineByLine(filesAndFolders[position].name, thisContext)).toMutableList()
 
 
 

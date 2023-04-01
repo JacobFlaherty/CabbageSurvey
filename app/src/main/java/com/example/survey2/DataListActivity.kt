@@ -1,16 +1,23 @@
 package com.example.survey2
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.Manifest.permission.*
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
+import android.nfc.Tag
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.view.ContextMenu.ContextMenuInfo
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +28,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 class DataListActivity : AppCompatActivity() {
+
+    private companion object{
+        private const val STORAGE_PERMISSION_CODE = 100
+        private const val TAG = "PERMISSION_TAG"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_data_list)
@@ -67,24 +79,85 @@ class DataListActivity : AppCompatActivity() {
          */
     }
     private fun checkPermissions(): Boolean {
-        val result = ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
-        if(result == PackageManager.PERMISSION_GRANTED){
-            return true
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            //Android is 11(R) or above
+            Environment.isExternalStorageManager()
         }
-        else {
-            return false
+        else{
+            //Android is below 11(R)
+            val write = ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
+            val read = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE)
+            write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
+    fun openFilesPage(){
+        val intent = Intent(this, FileViewActivity::class.java)
+        val path = this.getExternalFilesDir(null)
+        println(path.toString())
+        intent.putExtra("path",path.toString())
+        /*if(checkPermissions()){
+
+            println("Activity should be starting")
+        }
+        else{
+            requestPermission()
+            println("Permission should be requested")
+        }
+
+         */
+        startActivity(intent)
+
+    }
+
+    private val storageActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        Log.d(TAG, "storageActivityResultLauncher: ")
+        //here we will handle the result of our intent
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            //Android is 11(R) or above
+            if (Environment.isExternalStorageManager()){
+                //Manage External Storage Permission is granted
+                Log.d(TAG, "storageActivityResultLauncher: Manage External Storage Permission is granted")
+                openFilesPage()
+            }
+            else{
+                //Manage External Storage Permission is denied....
+                Log.d(TAG, "storageActivityResultLauncher: Manage External Storage Permission is denied....")
+
+            }
+        }
+        else{
+            //Android is below 11(R)
         }
     }
 
     fun requestPermission(){
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this,WRITE_EXTERNAL_STORAGE)){
-            Toast.makeText(this, "Storage permission required, allow in settings", Toast.LENGTH_SHORT).show()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            try {
+                Log.d(TAG, "requestPermission: try")
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+                val uri = Uri.fromParts("package",this.packageName, null)
+                intent.data = uri
+                storageActivityResultLauncher.launch(intent)
+            }
+            catch (e: Exception){
+                Log.d(TAG, "requestPermission: ", e)
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                storageActivityResultLauncher.launch(intent)
+            }
         }
         else{
-            ActivityCompat.requestPermissions(this, arrayOf("WRITE_EXTERNAL_STORAGE") ,111)
+            ActivityCompat.requestPermissions(this,
+                arrayOf(WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_CODE
+
+            )
         }
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu);
@@ -130,15 +203,7 @@ class DataListActivity : AppCompatActivity() {
         //when(item.itemId)
         return when(item.itemId){
             R.id.openItem -> {
-                val intent = Intent(this, FileViewActivity::class.java)
-                val path = Environment.getExternalStorageDirectory()
-                intent.putExtra("path",path)
-                if(checkPermissions()){
-                    startActivity(intent)
-                }
-                else{
-                    requestPermission()
-                }
+                openFilesPage()
 
                 true
             }
@@ -149,7 +214,7 @@ class DataListActivity : AppCompatActivity() {
                 }
                 else{
                     val csvOps = CsvImportExport()
-                    csvOps.writeLineByLine(PointsList.currMapName)
+                    csvOps.writeLineByLine(PointsList.currMapName, this)
                     //var mapToSave: com.example.survey2.Map = Map(MapsList.currMapName,PathsList.pathIndex)
                     //saveMapToInternalStorage(MapsList.currMapName, convertMapToStorable(mapToSave))
                     Toast.makeText(this, "Saved",Toast.LENGTH_LONG).show()

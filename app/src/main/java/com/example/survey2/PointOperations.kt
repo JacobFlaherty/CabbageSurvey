@@ -12,21 +12,26 @@ package com.example.survey2
     }
     fun pointToString(point: Point): Array<String>{
         var str: Array<String> = arrayOf()
-        str[0] = point.x.toString()
 
-        str.plus(point.y.toString())
+        str += point.x.toString()
 
-        str.plus(point.z.toString())
+        str += point.y.toString()
 
-        str.plus(point.pointNumber.toString())
+        str += point.z.toString()
 
-        str.plus(point.pointName)
+        str += point.pointNumber.toString()
 
-        str.plus(point.isIntersection.toString())
+        str += point.pointName
+
+        str += point.isIntersection.toString()
 
         for (Int in point.connectedPoints){
 
-            str.plus(Int.toString())
+            str+=Int.toString()
+        }
+        println("POINTARRSAVED: ")
+        for(String in str){
+            println(String)
         }
         return str
     }
@@ -43,16 +48,20 @@ package com.example.survey2
         var listPoints = mutableListOf<Point>()
         for (Array in list){
             var p = Point(0f,0f,0f,0)
+            println("ARRAY 0: " + Array[0])
             p.x = Array[0].toFloat()
             p.y = Array[1].toFloat()
             p.z = Array[2].toFloat()
             p.pointNumber = Array[3].toInt()
             p.pointName = Array[4]
-            for(i in 0 until Array.size - 5){
-                p.connectedPoints.add(Array[i+4].toInt())
+            p.isIntersection = Array[5].toBoolean()
+            for(i in 0 until Array.size - 6){
+                p.connectedPoints.add(Array[i+6].toInt())
 
             }
             listPoints.add(p)
         }
         return listPoints
     }
+
+

@@ -1,5 +1,6 @@
 package com.example.survey2;
 
+import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -20,7 +21,8 @@ public class CsvImportExport {
 
 
     public void writeToCsv(List<String[]> lines, Path path, String filename) throws Exception {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(path.toString()+filename+".csv"))){
+        System.out.println(path.toString());
+        try (CSVWriter writer = new CSVWriter(new FileWriter(path.toString()+"/"+filename+".csv"))){
             for (String[] line : lines){
                 writer.writeNext(line);
             }
@@ -34,11 +36,11 @@ public class CsvImportExport {
 
     }
 
-    public void writeLineByLine(String filename) throws Exception {
+    public void writeLineByLine(String filename, Context context) throws Exception {
 
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            java.nio.file.Path path = Environment.getExternalStorageDirectory().toPath();
+            java.nio.file.Path path = context.getExternalFilesDir(null).toPath();
             writeToCsv(PointOperationsKt.pointsListToStringList(), path, filename);
         }
 
@@ -59,12 +61,12 @@ public class CsvImportExport {
         return list;
     }
 
-    public List<String[]> readLineByLine(String filename) throws Exception {
+    public List<String[]> readLineByLine(String filename, Context context) throws Exception {
         List<String[]> list = new ArrayList<>();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            java.nio.file.Path path = Environment.getExternalStorageDirectory().toPath();
+            java.nio.file.Path path = context.getExternalFilesDir(null).toPath();
             String stringPath = path.toString();
-            stringPath = stringPath+filename+".csv";
+            stringPath = stringPath+"/"+filename;
             path = Paths.get(stringPath);
             return readCsv(path);
         }

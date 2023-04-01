@@ -32,6 +32,7 @@ import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
@@ -80,6 +81,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var cameraExecutor: ExecutorService
 
 
+    fun resetPointText(){
+        val txt = "Current Point: "+ PointsList.currentPoint
+        val pointText: TextView = findViewById(R.id.pointTextView) as TextView
+        pointText.text = txt
+    }
+
+
+
+
+
 
 
 
@@ -102,12 +113,53 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var currentDegree = 0f
 
     private var mSensorManager: SensorManager? = null
+    private fun getLargestConnectedPoint(point: Point): Int {
+        var highestInt = 0
+        for (Int in point.connectedPoints){
+            if (Int>highestInt){
+                highestInt=Int
+            }
+        }
+        return highestInt
+    }
+    private fun getSmallestConnectedPoint(point: Point): Int {
+        var lowestInt = 9999999
+        for (Int in point.connectedPoints){
+            if (Int<lowestInt){
+                lowestInt=Int
+            }
+        }
+        return lowestInt
+    }
+    fun cycleNextPoint(){
+        if(getLargestConnectedPoint(PointsList.getCurrentPointFromIndex(PointsList.currentPoint)) > PointsList.currentPoint){
+            PointsList.currentPoint = getLargestConnectedPoint(PointsList.getCurrentPointFromIndex(PointsList.currentPoint))
+        }
+    }
+    fun cyclePrevPoint(){
+        if(getSmallestConnectedPoint(PointsList.getCurrentPointFromIndex(PointsList.currentPoint)) < PointsList.currentPoint){
+            PointsList.currentPoint = getSmallestConnectedPoint(PointsList.getCurrentPointFromIndex(PointsList.currentPoint))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         initData()
+        resetPointText()
+        val nextButton = findViewById<ImageButton>(R.id.nextptButton)
+        val prevButton = findViewById<ImageButton>(R.id.prevptButton)
+
+        nextButton.setOnClickListener {
+            cycleNextPoint()
+            resetPointText()
+        }
+
+        prevButton.setOnClickListener {
+            cyclePrevPoint()
+            resetPointText()
+        }
 
 
 
@@ -224,6 +276,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         PointsList.pointIndex[PointsList.currentPoint].connectedPoints.add(newPoint.pointNumber)
         if(canMoveOn) {
             PointsList.currentPoint = PointsList.pointIndex.size - 1
+            resetPointText()
         }
 
 
@@ -231,6 +284,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun deletePoint(){
         PointsList.pointIndex.removeAt(PointsList.pointIndex.size-1)
+        resetPointText()
     }
 
     private fun calculatePointRelative(
@@ -278,6 +332,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
     private fun setIntersection() {
+        canMoveOn = false
+        PointsList.getCurrentPointFromIndex(PointsList.currentPoint).isIntersection = true
+
 
     }
 

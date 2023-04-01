@@ -33,7 +33,7 @@ class PointViewAdapter(
 
     override fun onBindViewHolder(holder: PointViewHolder, position: Int) {
         holder.binding.apply {
-            val titleText = "Point #"+position.toString()
+            val titleText = "Point #"+PointsList.pointIndex[position].pointNumber
             tvTitle.text = titleText
             textViewX.text = PointsList.pointIndex[position].x.toString()
             textViewY.text = PointsList.pointIndex[position].y.toString()
