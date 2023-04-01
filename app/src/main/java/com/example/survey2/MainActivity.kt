@@ -41,6 +41,7 @@ import com.example.survey2.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.lang.Math.cos
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -295,26 +296,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var x = 0f
         var y = 0f
         var z = 0f
+        var hD = getHorizontalDistance(distance,inclination)
         if (angle <= 90f) {
-            x = distance * -sin(degreesToRadians(angle))
+            x = hD * -sin(degreesToRadians(angle))
 
-            y = distance * kotlin.math.cos(degreesToRadians(angle))
+            y = hD * kotlin.math.cos(degreesToRadians(angle))
 
 
         } else if (angle > 90f && angle <= 180f) {
-            x = distance * sin(degreesToRadians(180f - angle))
+            x = hD * sin(degreesToRadians(180f - angle))
 
-            y = distance * kotlin.math.cos(degreesToRadians(180f - angle)) * -1f
+            y = hD * kotlin.math.cos(degreesToRadians(180f - angle)) * -1f
 
         } else if (angle > 180f && angle <= 270f) {
-            x = distance * sin(degreesToRadians(angle - 180f))
+            x = hD * sin(degreesToRadians(angle - 180f))
 
-            y = distance * kotlin.math.cos(degreesToRadians(angle - 180f)) * -1f
+            y = hD * kotlin.math.cos(degreesToRadians(angle - 180f)) * -1f
 
         } else if (angle > 270f && angle <= 360f) {
-            x = distance * sin(degreesToRadians(360f - angle))
+            x = hD * sin(degreesToRadians(360f - angle))
 
-            y = distance * kotlin.math.cos(degreesToRadians(360f - angle))
+            y = hD * kotlin.math.cos(degreesToRadians(360f - angle))
 
         }
 
@@ -328,6 +330,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun degreesToRadians(degrees: Float): Float {
         return (degrees * (PI / 180f)).toFloat()
 
+    }
+
+    private fun getHorizontalDistance(d: Float, inclination: Float): Float {
+        return d * kotlin.math.cos(degreesToRadians(inclination)+(PI/2f).toFloat())
     }
 
 
