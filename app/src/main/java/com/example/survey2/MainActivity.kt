@@ -25,9 +25,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.core.Preview
 import androidx.camera.core.CameraSelector
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.Button
@@ -45,6 +43,14 @@ import java.lang.Math.cos
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import androidx.camera.core.ZoomState
+import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.camera.core.CameraInfo
+import androidx.camera.core.CameraProvider
+import androidx.camera.view.PreviewView
+import androidx.viewbinding.ViewBinding
+import kotlin.jvm.internal.Intrinsics.Kotlin
+
 
 typealias LumaListener = (luma: Double) -> Unit
 
@@ -161,6 +167,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             cyclePrevPoint()
             resetPointText()
         }
+
 
 
 
@@ -350,6 +357,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         println(distance)
     }
 
+    private fun calculateDistanceFromWidth(horizontalFoV: Float, horizontalResolution: Float, targetWidthPixels: Float, targetWidthcm: Float): Float{
+        var angularSize: Float
+        angularSize = (targetWidthPixels/horizontalResolution)*horizontalFoV
+        var distancem: Float
+        distancem = ((targetWidthcm/2)/ kotlin.math.cos((angularSize/2)* PI.toFloat()/180))/100
+        return distancem
+    }
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -367,17 +382,67 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
+
+
+
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
+                val camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview)
+
+
+
+
+
+
+                val cameraControl = camera.cameraControl
+                val cameraInfo = camera.cameraInfo
+                cameraControl.setZoomRatio(8.0f)
+
+                val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    override fun onScale(detector: ScaleGestureDetector): Boolean {
+                        val scale = cameraInfo.zoomState.value?.zoomRatio?.times(detector.scaleFactor)
+                        if (scale != null){
+                            cameraControl.setZoomRatio(8.0f)
+                            println("works")
+                        }
+                        else{
+                            cameraControl.setZoomRatio(8.0f)
+                            println("works2")
+                        }
+
+                        return true
+                    }
+                }
+
+                val scaleGestureDetector = ScaleGestureDetector(this, listener)
+
+                View.OnTouchListener { _, event ->
+                    scaleGestureDetector.onTouchEvent(event)
+                    return@OnTouchListener true
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
+
+
 
         }, ContextCompat.getMainExecutor(this))
     }
